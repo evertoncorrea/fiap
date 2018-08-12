@@ -1,0 +1,153 @@
+---
+title: "TrabalhoR"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Trabalho Programando IA com R
+
+Definindo Quadrantes
+
+###explicação
+```{r}
+TAMANHO = 20/(111.12*1000)
+
+
+db <- mutate( db, QUADRANTE_LONG_PICKUP =  1 + ceiling((pickup_longitude - (min(pickup_longitude))) /(TAMANHO) ) )
+
+db <- mutate( db, QUADRANTE_LAT_PICKUP =  1 + ceiling((pickup_latitude - (min(pickup_latitude))) /(TAMANHO) ) )
+
+
+
+
+db <- mutate( db, QUADRANTE_LONG_DROPOFF =  1 + ceiling((dropoff_longitude - (min(dropoff_longitude))) /(TAMANHO) ) )
+
+db <- mutate( db, QUADRANTE_LAT_DROPOFF =  1 + ceiling((dropoff_latitude - (min(dropoff_latitude))) /(TAMANHO) ) )
+
+```
+
+
+Mapas de Calor PICKUP e DROPOFF
+```{r}
+#definindo vetores com sequencia de todos os quadrantes de longitude e latitude(1:máximo)
+QUA_LONG = 1:max(db$QUADRANTE_LONG_PICKUP,db$QUADRANTE_LONG_DROPOFF)
+QUA_LAT = 1:max(db$QUADRANTE_LAT_PICKUP,db$QUADRANTE_LAT_DROPOFF)
+
+#definindo plano cartesiano, combinando longitude com latitude
+crossing(QUADRANTE_LONG = QUA_LONG, QUADRANTE_LAT = QUA_LAT) -> QUADRANTE_CARTESIANO
+
+#populando o plano cartesiano com os totais de viagens de cada quadrante
+db %>% 
+  group_by(QUADRANTE_LONG_PICKUP, QUADRANTE_LAT_PICKUP ) %>% 
+    summarise(QNT_VIAGENS = n() )%>% 
+        right_join(QUADRANTE_CARTESIANO, by=c("QUADRANTE_LONG_PICKUP"="QUADRANTE_LONG" , "QUADRANTE_LAT_PICKUP" = "QUADRANTE_LAT" )) %>% 
+  na.fill(fill = 0) %>% 
+    data.frame()-> Grafico_Pickup
+
+db %>% 
+  group_by(QUADRANTE_LONG_DROPOFF, QUADRANTE_LAT_DROPOFF ) %>% 
+    summarise(QNT_VIAGENS = n() )%>% 
+        right_join(QUADRANTE_CARTESIANO, by=c("QUADRANTE_LONG_DROPOFF"="QUADRANTE_LONG" , "QUADRANTE_LAT_DROPOFF" = "QUADRANTE_LAT" )) %>% 
+  na.fill(fill = 0) %>% 
+    data.frame()-> Grafico_Dropoff
+
+#aplicando logaritmo para normalizar cores no gráfico
+Grafico_Pickup <- mutate( Grafico_Pickup, QNT_VIAGENS_NORM = log( QNT_VIAGENS,30))   
+Grafico_Dropoff <- mutate( Grafico_Dropoff, QNT_VIAGENS_NORM = log( QNT_VIAGENS,30))   
+
+#criando escala de cores
+cores = c("DeepSkyBlue", "DodgerBlue", "red")
+gradient.nosso = colorRampPalette(cores)(n = max(Grafico_Pickup$QNT_VIAGENS_NORM) )
+
+#gerando o mapa
+with(Grafico_Pickup,
+     image(
+       x = QUA_LONG,
+       y = QUA_LAT,
+       z =t(matrix(QNT_VIAGENS_NORM,nrow = length(QUA_LAT))), 
+       col = gradient.nosso
+     )
+)
+title(main = "Pickup", font.main = 4)
+
+with(Grafico_Dropoff,
+     image(
+       x = QUA_LONG,
+       y = QUA_LAT,
+       z =t(matrix(QNT_VIAGENS_NORM,nrow = length(QUA_LAT))), 
+       col = gradient.nosso
+     )
+)
+title(main = "Dropoff", font.main = 4)
+
+
+rm(QUA_LONG, QUA_LAT, QUADRANTE_CARTESIANO, cores, gradient.nosso, Grafico_Pickup, Grafico_Dropoff)
+```
+
+CLUSTERS
+```{r}
+#pickup
+set.seed(15624)
+c = kmeans(x=select(db, QUADRANTE_LONG_PICKUP, QUADRANTE_LAT_PICKUP), center=15)
+with( db, {
+  plot(QUADRANTE_LONG_PICKUP, QUADRANTE_LAT_PICKUP, col=c$cluster, pch=20, cex=.1)
+})
+points(c$centers, col="dark gray", bg=15:1, pch=19, cex=2)
+text(x=c$centers[1:15,1],y=c$centers[1:15,2],1:15, cex=0.5)
+title(main = "Pickup", font.main = 4)
+db = mutate(db, cluster_pickup=c$cluster)
+
+#dropoff
+set.seed(15625)
+c = kmeans(x=select(db, QUADRANTE_LONG_DROPOFF, QUADRANTE_LAT_DROPOFF), center=15)
+#, 
+with( db, {
+  plot(QUADRANTE_LONG_DROPOFF, QUADRANTE_LAT_DROPOFF, col=c$cluster, pch=20, cex=.1)
+})
+points(c$centers, col="dark gray", bg=15:1, pch=19, cex=2)
+text(x=c$centers[1:15,1],y=c$centers[1:15,2],1:15, cex=0.5)
+title(main = "Dropoff", font.main = 4)
+db = mutate(db, cluster_dropoff=c$cluster)
+
+rm(c)
+```
+
+Adicionando Pontos de Interesse e Colunas Viagens
+```{r}
+Label_Pickup = c("Aeroporto_Int JFK","Hotel Roosevelt","Brooklyn","Teatro Beacon","Prefeitura", "Hotel Plaza", "Biblioteca NY","Hotel Hudson","Parque Roosevelt","Empire State","Harlem","Museu Whitney", "Hotel Pensylvania", "Aeroporto_Reg LG", "Igreja OurLady")
+
+Label_Dropoff = c("Hotel Pensylvania","Brooklin Norte","Aeroporto_Int JFK","Harlem","Parque Roosevelt","Hotel Plaza","Hotel Roosevelt","Bronx","Aeroporto_Reg LG","Teatro Beacon","Museu Whitney","Igreja OurLady","Prefeitura","Brooklin Sul","Hotel Hudson")
+
+
+db = mutate(db, clabel_pickup= Label_Pickup[db$cluster_pickup])
+db = mutate(db, clabel_dropoff= Label_Dropoff[db$cluster_dropoff])
+
+db %>% 
+  group_by(clabel_pickup, clabel_dropoff ) %>% 
+  summarise(QNT_VIAGENS = n() ) -> db2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Regressão **Tempo de viagem vs KM

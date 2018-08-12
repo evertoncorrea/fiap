@@ -1,0 +1,124 @@
+---
+title: "TrabalhoR"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Trabalho Programando IA com R
+
+Notebook 1
+Este notebook prepara o ambiente e analisa algumas variáveis com o objetivo de preparar a base para análises posteriores retirando outliers
+
+
+Limpeza do Enviroment
+```{r limpeza}
+rm(list=ls())
+```
+
+Instala??o Pacotes
+```{r warning=FALSE}
+#install.packages("dplyr")
+#install.packages("plotly")
+#install.packages("lubridate")
+#install.packages("knitr")
+#install.packages("readr")
+#install.packages("zoo")
+#install.packages("scales")
+#install.packages("dendextend")
+#install.packages("ape")
+#install.packages("tidyr")
+
+library(dplyr)
+library(plotly) 
+library(lubridate)
+library(knitr)
+library(readr)
+library(zoo)
+library(scales)
+library(dendextend)
+library(ape)
+library(tidyr)
+```
+
+Subindo bases
+```{r}
+setwd('/Users/everton.correa/Desktop/fiap/taxi/db')
+train = read.csv("train.csv")
+```
+
+
+C?lculo dist?ncia Euclidiana e de Manhattan
+```{r}
+Viagens <- mutate(train,
+                  Dist.Euc = sqrt((dropoff_longitude-pickup_longitude)**2+(dropoff_latitude-pickup_latitude)**2),
+                  Dist.Man = (abs((dropoff_longitude-pickup_longitude))+abs((dropoff_latitude-pickup_latitude))))
+```
+
+Transformando dist?ncias em KM
+```{r}
+Viagens <- mutate(Viagens,
+                  Dist.Euc.KM = Dist.Euc*111.12,
+                  Dist.Man.KM = Dist.Man*111.12)
+```
+
+Análise de outliers da longitude, considerando pickup e dropoff
+```{r}
+longitude = c(Viagens$pickup_longitude, Viagens$dropoff_longitude)
+
+hist(longitude, breaks=100, freq=FALSE, col="green", main="Longitude", xlab="graus")
+```
+
+Testando, escolhemos a faixa entre -74.02 e -73.77 para a longitude
+```{r}
+longitude = longitude[longitude > -74.02 & longitude < -73.77]
+hist(longitude, breaks=100, freq=FALSE, col="green", main="Longitude considerada", xlab="graus")
+```
+
+Análise de outliers da latitude, considerando pickup e dropoff
+```{r}
+latitude = c(Viagens$pickup_latitude, Viagens$dropoff_latitude)
+
+hist(latitude, breaks=100, freq=FALSE, col="red", main="Latitude", xlab="graus")
+```
+
+Testando, escolhemos a faixa entre 40.60 e 40.89 para a latitude
+```{r}
+latitude = latitude[latitude > 40.60 & latitude < 40.89]
+hist(latitude, breaks=100, freq=FALSE, col="red", main="Latitude considerada", xlab="graus")
+```
+
+Análise do tempo de viagem
+```{r}
+hist(Viagens$trip_duration, breaks=100, freq=FALSE, col="blue", main="Tempo de viagem", xlab="tempo(s)")
+summary(Viagens$trip_duration)
+```
+
+Testando, escolhemos a faixa até 5400s (1h30) para o tempo de viagem
+```{r}
+t_viagem = Viagens$trip_duration
+t_viagem = t_viagem[t_viagem < 5400]
+hist(t_viagem, breaks=100, freq=FALSE, col="blue", main="Tempo de viagem considerada", xlab="tempo(s)")
+```
+
+
+
+Aplicando Filtros para gerar nova base sem outliers
+
+Além disso, adicionamos filtro para desconsiderar viagens com distância ZERO
+```{r}
+Viagens %>% 
+filter(pickup_longitude >  -74.02 ) %>%
+filter(pickup_longitude <  -73.77 ) %>%
+filter(pickup_latitude >  40.60 ) %>%
+filter(pickup_latitude <  40.89 ) %>%
+filter(dropoff_longitude >  -74.02 ) %>%
+filter(dropoff_longitude <  -73.77 ) %>%
+filter(dropoff_latitude >  40.60 ) %>%
+filter(dropoff_latitude <  40.89 ) %>%
+filter(trip_duration < 5400 ) %>% 
+filter(Dist.Man.KM >  0.020) -> db
+
+rm(train,Viagens, latitude, longitude, t_viagem)
+```
+
