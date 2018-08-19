@@ -298,9 +298,121 @@ barplot(vm$kmph_avg, names.arg=vm$horario, col=&quot;purple&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<div id="section" class="section level2">
+<h2>=======</h2>
+<p>title: “R Notebook” output: html_notebook —</p>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShsdWJyaWRhdGUpXG4jZGlhcyBkYSBzZW1hbmFcbmR3ayA9IGMoXCJkb21cIiwgXCJzZWdcIiwgXCJ0ZXJcIiwgXCJxdWFcIiwgXCJxdWlcIiwgXCJzZXhcIiwgXCJzYWJcIilcbmBgYCJ9 -->
+<pre class="r"><code>library(lubridate)
+#dias da semana
+dwk = c(&quot;dom&quot;, &quot;seg&quot;, &quot;ter&quot;, &quot;qua&quot;, &quot;qui&quot;, &quot;sex&quot;, &quot;sab&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Novas colunas para análise: velocidade média, considerando caminho reto (distância euclidiana) - embora não reflita a relidade devido ao formato das ruas, é aplicável para analisar o deslocamento de uma maneira aproximada; dia da semana; mês; horário (pickup)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGIgJT4lICBtdXRhdGUodHJpcF9kdXJhdGlvbl9tID0gdHJpcF9kdXJhdGlvbiAvIDYwKSAlPiUgI3RyaXBfZHVyYXRpb24gZW0gbWludXRvc1xuICAgICAgICBtdXRhdGUodmVsLm1lZGlhLmttcGggPSAoRGlzdC5FdWMuS00gKiA2MCkgLyB0cmlwX2R1cmF0aW9uX20pICU+JSAjY29uc2lkLmNhbWluaG8gZGlyZXRvXG4gICAgICAgIG11dGF0ZShkdF9waWNrdXAgPSB5bWRfaG1zKHBpY2t1cF9kYXRldGltZSkpICU+JSBcbiAgICAgICAgbXV0YXRlKGR0X2Ryb3BvZmYgPSB5bWRfaG1zKGRyb3BvZmZfZGF0ZXRpbWUpKSAlPiUgXG4gICAgICAgIG11dGF0ZShkaWEuc2VtYW5hID0gd2RheShkdF9waWNrdXApKSAlPiUgIzE9ZG9tIH4gNz1zYWJcbiAgICAgICAgbXV0YXRlKGFuby5tZXMgPSBzdWJzdHIocGlja3VwX2RhdGV0aW1lLCAxLCA3KSkgJT4lXG4gICAgICAgIG11dGF0ZShob3JhcmlvID0gaG91cihkdF9waWNrdXApICkgLT4gZGIyXG5cbiN2ZWxvY2lkYWRlIG3DqWRpYVxuc3VtbWFyeShkYjIkdmVsLm1lZGlhLmttcGgpXG5gYGAifQ== -->
+<pre class="r"><code>db %&gt;%  mutate(trip_duration_m = trip_duration / 60) %&gt;% #trip_duration em minutos
+        mutate(vel.media.kmph = (Dist.Euc.KM * 60) / trip_duration_m) %&gt;% #consid.caminho direto
+        mutate(dt_pickup = ymd_hms(pickup_datetime)) %&gt;% 
+        mutate(dt_dropoff = ymd_hms(dropoff_datetime)) %&gt;% 
+        mutate(dia.semana = wday(dt_pickup)) %&gt;% #1=dom ~ 7=sab
+        mutate(ano.mes = substr(pickup_datetime, 1, 7)) %&gt;%
+        mutate(horario = hour(dt_pickup) ) -&gt; db2
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkobHVicmlkYXRlKQojZGlhcyBkYSBzZW1hbmEKZHdrID0gYygiZG9tIiwgInNlZyIsICJ0ZXIiLCAicXVhIiwgInF1aSIsICJzZXgiLCAic2FiIikKYGBgCgpOb3ZhcyBjb2x1bmFzIHBhcmEgYW7DoWxpc2U6CnZlbG9jaWRhZGUgbcOpZGlhLCBjb25zaWRlcmFuZG8gY2FtaW5obyByZXRvIChkaXN0w6JuY2lhIGV1Y2xpZGlhbmEpIC0gZW1ib3JhIG7Do28gcmVmbGl0YSBhIHJlbGlkYWRlIGRldmlkbyBhbyBmb3JtYXRvIGRhcyBydWFzLCDDqSBhcGxpY8OhdmVsIHBhcmEgYW5hbGlzYXIgbyBkZXNsb2NhbWVudG8gZGUgdW1hIG1hbmVpcmEgYXByb3hpbWFkYTsKZGlhIGRhIHNlbWFuYTsgbcOqczsgaG9yw6FyaW8gKHBpY2t1cCkKYGBge3J9CmRiICU+JSAgbXV0YXRlKHRyaXBfZHVyYXRpb25fbSA9IHRyaXBfZHVyYXRpb24gLyA2MCkgJT4lICN0cmlwX2R1cmF0aW9uIGVtIG1pbnV0b3MKICAgICAgICBtdXRhdGUodmVsLm1lZGlhLmttcGggPSAoRGlzdC5FdWMuS00gKiA2MCkgLyB0cmlwX2R1cmF0aW9uX20pICU+JSAjY29uc2lkLmNhbWluaG8gZGlyZXRvCiAgICAgICAgbXV0YXRlKGR0X3BpY2t1cCA9IHltZF9obXMocGlja3VwX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkdF9kcm9wb2ZmID0geW1kX2htcyhkcm9wb2ZmX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkaWEuc2VtYW5hID0gd2RheShkdF9waWNrdXApKSAlPiUgIzE9ZG9tIH4gNz1zYWIKICAgICAgICBtdXRhdGUoYW5vLm1lcyA9IHN1YnN0cihwaWNrdXBfZGF0ZXRpbWUsIDEsIDcpKSAlPiUKICAgICAgICBtdXRhdGUoaG9yYXJpbyA9IGhvdXIoZHRfcGlja3VwKSApIC0+IGRiMgoKI3ZlbG9jaWRhZGUgbcOpZGlhCnN1bW1hcnkoZGIyJHZlbC5tZWRpYS5rbXBoKQpgYGAKRGV0ZWN0YWRvIG11aXRvcyBvdXRsaWVycyAoZXguOiBNYXggPiAxMDAwMCBrbS9oKQoKCgpSZWdyZXNzw6NvICoqVGVtcG8gZGUgdmlhZ2VtIHZzIEtNCgpgYGB7cn0KcGxvdCh4PWRiJERpc3QuRXVjLktNLCB5PWRiJHRyaXBfZHVyYXRpb24vNjAsIHBjaD0yMCwgY2V4PS4xKQptID0gbG0oZGIkdHJpcF9kdXJhdGlvbi82MCB+IGRiJERpc3QuRXVjLktNKQphYmxpbmUobSwgY29sPSJyZWQiKQpybShtKQpgYGAKClRlbXBvIGRlIHZpYWdlbSB2cyBLbSAtIFRlcsOnYS1mZWlyYQpgYGB7cn0KZjEgPSBmaWx0ZXIoZGIyLCBkaWEuc2VtYW5hID09IDMpCmYyID0gZmlsdGVyKGYxLCBob3JhcmlvID09IDUpCmYzID0gZmlsdGVyKGYyLCBjbHVzdGVyX3BpY2t1cCA9PSA0KQpmID0gZmlsdGVyKGYzLCBjbHVzdGVyX2Ryb3BvZmYgPT0gMykKCgpwbG90KHg9ZiREaXN0LkV1Yy5LTSwgeT1mJHRyaXBfZHVyYXRpb25fbSwgcGNoPTIwLCBjZXg9LjEpCm0gPSBsbShmJHRyaXBfZHVyYXRpb25fbSB+IGYkRGlzdC5FdWMuS00pCmFibGluZShtLCBjb2w9InJlZCIpCnJtKG0sIGYpCmBgYAoKYGBge3J9CiNoaXN0KGRiMiRkaWEuc2VtYW5hLCBicmVha3M9MDo3LCBmcmVxPUZBTFNFLCBsYWJlbHM9ZHdrLCBtYWluPSJEaWEgZGEgc2VtYW5hIikKZGIyICU+JSBncm91cF9ieShkaWEuc2VtYW5hKSAlPiUgc3VtbWFyaXplKHF0ZCA9IG4oKSkgLT4gcXRkCmJhcnBsb3QocXRkJHF0ZCwgbmFtZXMuYXJnPWR3a1txdGQkZGlhLnNlbWFuYV0sIGNvbD0ib3JhbmdlIikKcm0ocXRkKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBkaWEgZGEgc2VtYW5hCmBgYHtyfQpkYjIgJT4lIGdyb3VwX2J5KGRpYS5zZW1hbmEpICU+JSBzdW1tYXJpemUoa21waF9hdmcgPSBtZWFuKHZlbC5tZWRpYS5rbXBoKSkgLT4gdm0KYmFycGxvdCh2bSRrbXBoX2F2ZywgbmFtZXMuYXJnPWR3a1t2bSRkaWEuc2VtYW5hXSwgY29sPSJwdXJwbGUiKQpybSh2bSkKYGBgCgpWaWFnZW5zIHBvciBob3LDoXJpbwpgYGB7cn0KaGlzdChkYjIkaG9yYXJpbywgZnJlcT1GQUxTRSwgY29sPSJsaWdodCB5ZWxsb3ciKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBob3LDoXJpbwpgYGB7cn0KZGIyICU+JSBncm91cF9ieShob3JhcmlvPWZsb29yKGhvcmFyaW8pKSAlPiUgc3VtbWFyaXplKGttcGhfYXZnID0gbWVhbih2ZWwubWVkaWEua21waCkpIC0+IHZtCmJhcnBsb3Qodm0ka21waF9hdmcsIG5hbWVzLmFyZz12bSRob3JhcmlvLCBjb2w9InB1cnBsZSIpCnJtKHZtKQpgYGAKCg==</div>
+#velocidade média
+summary(db2$vel.media.kmph)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Detectado muitos outliers (ex.: Max &gt; 10000 km/h)</p>
+<p>Regressão **Tempo de viagem vs KM</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdCh4PWRiJERpc3QuRXVjLktNLCB5PWRiJHRyaXBfZHVyYXRpb24vNjAsIHBjaD0yMCwgY2V4PS4xKVxubSA9IGxtKGRiJHRyaXBfZHVyYXRpb24vNjAgfiBkYiREaXN0LkV1Yy5LTSlcbmFibGluZShtLCBjb2w9XCJyZWRcIilcbnJtKG0pXG5gYGAifQ== -->
+<pre class="r"><code>plot(x=db$Dist.Euc.KM, y=db$trip_duration/60, pch=20, cex=.1)
+m = lm(db$trip_duration/60 ~ db$Dist.Euc.KM)
+abline(m, col=&quot;red&quot;)
+rm(m)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Tempo de viagem vs Km - Terça-feira</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZjEgPSBmaWx0ZXIoZGIyLCBkaWEuc2VtYW5hID09IDMpXG5mMiA9IGZpbHRlcihmMSwgaG9yYXJpbyA9PSA1KVxuZjMgPSBmaWx0ZXIoZjIsIGNsdXN0ZXJfcGlja3VwID09IDQpXG5mID0gZmlsdGVyKGYzLCBjbHVzdGVyX2Ryb3BvZmYgPT0gMylcblxuXG5wbG90KHg9ZiREaXN0LkV1Yy5LTSwgeT1mJHRyaXBfZHVyYXRpb25fbSwgcGNoPTIwLCBjZXg9LjEpXG5tID0gbG0oZiR0cmlwX2R1cmF0aW9uX20gfiBmJERpc3QuRXVjLktNKVxuYWJsaW5lKG0sIGNvbD1cInJlZFwiKVxucm0obSwgZilcbmBgYCJ9 -->
+<pre class="r"><code>f1 = filter(db2, dia.semana == 3)
+f2 = filter(f1, horario == 5)
+f3 = filter(f2, cluster_pickup == 4)
+f = filter(f3, cluster_dropoff == 3)
+
+
+plot(x=f$Dist.Euc.KM, y=f$trip_duration_m, pch=20, cex=.1)
+m = lm(f$trip_duration_m ~ f$Dist.Euc.KM)
+abline(m, col=&quot;red&quot;)
+rm(m, f)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2hpc3QoZGIyJGRpYS5zZW1hbmEsIGJyZWFrcz0wOjcsIGZyZXE9RkFMU0UsIGxhYmVscz1kd2ssIG1haW49XCJEaWEgZGEgc2VtYW5hXCIpXG5kYjIgJT4lIGdyb3VwX2J5KGRpYS5zZW1hbmEpICU+JSBzdW1tYXJpemUocXRkID0gbigpKSAtPiBxdGRcbmJhcnBsb3QocXRkJHF0ZCwgbmFtZXMuYXJnPWR3a1txdGQkZGlhLnNlbWFuYV0sIGNvbD1cIm9yYW5nZVwiKVxucm0ocXRkKVxuYGBgIn0= -->
+<pre class="r"><code>#hist(db2$dia.semana, breaks=0:7, freq=FALSE, labels=dwk, main=&quot;Dia da semana&quot;)
+db2 %&gt;% group_by(dia.semana) %&gt;% summarize(qtd = n()) -&gt; qtd
+barplot(qtd$qtd, names.arg=dwk[qtd$dia.semana], col=&quot;orange&quot;)
+rm(qtd)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Velocidade média por dia da semana</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGIyICU+JSBncm91cF9ieShkaWEuc2VtYW5hKSAlPiUgc3VtbWFyaXplKGttcGhfYXZnID0gbWVhbih2ZWwubWVkaWEua21waCkpIC0+IHZtXG5iYXJwbG90KHZtJGttcGhfYXZnLCBuYW1lcy5hcmc9ZHdrW3ZtJGRpYS5zZW1hbmFdLCBjb2w9XCJwdXJwbGVcIilcbnJtKHZtKVxuYGBgIn0= -->
+<pre class="r"><code>db2 %&gt;% group_by(dia.semana) %&gt;% summarize(kmph_avg = mean(vel.media.kmph)) -&gt; vm
+barplot(vm$kmph_avg, names.arg=dwk[vm$dia.semana], col=&quot;purple&quot;)
+rm(vm)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Viagens por horário</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGlzdChkYjIkaG9yYXJpbywgZnJlcT1GQUxTRSwgY29sPVwibGlnaHQgeWVsbG93XCIpXG5gYGAifQ== -->
+<pre class="r"><code>hist(db2$horario, freq=FALSE, col=&quot;light yellow&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Velocidade média por horário</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGIyICU+JSBncm91cF9ieShob3JhcmlvPWZsb29yKGhvcmFyaW8pKSAlPiUgc3VtbWFyaXplKGttcGhfYXZnID0gbWVhbih2ZWwubWVkaWEua21waCkpIC0+IHZtXG5iYXJwbG90KHZtJGttcGhfYXZnLCBuYW1lcy5hcmc9dm0kaG9yYXJpbywgY29sPVwicHVycGxlXCIpXG5ybSh2bSlcbmBgYCJ9 -->
+<pre class="r"><code>db2 %&gt;% group_by(horario=floor(horario)) %&gt;% summarize(kmph_avg = mean(vel.media.kmph)) -&gt; vm
+barplot(vm$kmph_avg, names.arg=vm$horario, col=&quot;purple&quot;)
+rm(vm)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>2860dc92543e7fc3e1bda901bc2e016dbdb2c100</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<!-- rnb-text-end -->
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkobHVicmlkYXRlKQojZGlhcyBkYSBzZW1hbmEKZHdrID0gYygiZG9tIiwgInNlZyIsICJ0ZXIiLCAicXVhIiwgInF1aSIsICJzZXgiLCAic2FiIikKYGBgCgpOb3ZhcyBjb2x1bmFzIHBhcmEgYW7DoWxpc2U6CnZlbG9jaWRhZGUgbcOpZGlhLCBjb25zaWRlcmFuZG8gY2FtaW5obyByZXRvIChkaXN0w6JuY2lhIGV1Y2xpZGlhbmEpIC0gZW1ib3JhIG7Do28gcmVmbGl0YSBhIHJlbGlkYWRlIGRldmlkbyBhbyBmb3JtYXRvIGRhcyBydWFzLCDDqSBhcGxpY8OhdmVsIHBhcmEgYW5hbGlzYXIgbyBkZXNsb2NhbWVudG8gZGUgdW1hIG1hbmVpcmEgYXByb3hpbWFkYTsKZGlhIGRhIHNlbWFuYTsgbcOqczsgaG9yw6FyaW8gKHBpY2t1cCkKYGBge3J9CmRiICU+JSAgbXV0YXRlKHRyaXBfZHVyYXRpb25fbSA9IHRyaXBfZHVyYXRpb24gLyA2MCkgJT4lICN0cmlwX2R1cmF0aW9uIGVtIG1pbnV0b3MKICAgICAgICBtdXRhdGUodmVsLm1lZGlhLmttcGggPSAoRGlzdC5FdWMuS00gKiA2MCkgLyB0cmlwX2R1cmF0aW9uX20pICU+JSAjY29uc2lkLmNhbWluaG8gZGlyZXRvCiAgICAgICAgbXV0YXRlKGR0X3BpY2t1cCA9IHltZF9obXMocGlja3VwX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkdF9kcm9wb2ZmID0geW1kX2htcyhkcm9wb2ZmX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkaWEuc2VtYW5hID0gd2RheShkdF9waWNrdXApKSAlPiUgIzE9ZG9tIH4gNz1zYWIKICAgICAgICBtdXRhdGUoYW5vLm1lcyA9IHN1YnN0cihwaWNrdXBfZGF0ZXRpbWUsIDEsIDcpKSAlPiUKICAgICAgICBtdXRhdGUoaG9yYXJpbyA9IGhvdXIoZHRfcGlja3VwKSApIC0+IGRiMgoKI3ZlbG9jaWRhZGUgbcOpZGlhCnN1bW1hcnkoZGIyJHZlbC5tZWRpYS5rbXBoKQpgYGAKRGV0ZWN0YWRvIG11aXRvcyBvdXRsaWVycyAoZXguOiBNYXggPiAxMDAwMCBrbS9oKQoKCgpSZWdyZXNzw6NvICoqVGVtcG8gZGUgdmlhZ2VtIHZzIEtNCgpgYGB7cn0KcGxvdCh4PWRiJERpc3QuRXVjLktNLCB5PWRiJHRyaXBfZHVyYXRpb24vNjAsIHBjaD0yMCwgY2V4PS4xKQptID0gbG0oZGIkdHJpcF9kdXJhdGlvbi82MCB+IGRiJERpc3QuRXVjLktNKQphYmxpbmUobSwgY29sPSJyZWQiKQpybShtKQpgYGAKClRlbXBvIGRlIHZpYWdlbSB2cyBLbSAtIFRlcsOnYS1mZWlyYQpgYGB7cn0KZjEgPSBmaWx0ZXIoZGIyLCBkaWEuc2VtYW5hID09IDMpCmYyID0gZmlsdGVyKGYxLCBob3JhcmlvID09IDUpCmYzID0gZmlsdGVyKGYyLCBjbHVzdGVyX3BpY2t1cCA9PSA0KQpmID0gZmlsdGVyKGYzLCBjbHVzdGVyX2Ryb3BvZmYgPT0gMykKCgpwbG90KHg9ZiREaXN0LkV1Yy5LTSwgeT1mJHRyaXBfZHVyYXRpb25fbSwgcGNoPTIwLCBjZXg9LjEpCm0gPSBsbShmJHRyaXBfZHVyYXRpb25fbSB+IGYkRGlzdC5FdWMuS00pCmFibGluZShtLCBjb2w9InJlZCIpCnJtKG0sIGYpCmBgYAoKYGBge3J9CiNoaXN0KGRiMiRkaWEuc2VtYW5hLCBicmVha3M9MDo3LCBmcmVxPUZBTFNFLCBsYWJlbHM9ZHdrLCBtYWluPSJEaWEgZGEgc2VtYW5hIikKZGIyICU+JSBncm91cF9ieShkaWEuc2VtYW5hKSAlPiUgc3VtbWFyaXplKHF0ZCA9IG4oKSkgLT4gcXRkCmJhcnBsb3QocXRkJHF0ZCwgbmFtZXMuYXJnPWR3a1txdGQkZGlhLnNlbWFuYV0sIGNvbD0ib3JhbmdlIikKcm0ocXRkKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBkaWEgZGEgc2VtYW5hCmBgYHtyfQpkYjIgJT4lIGdyb3VwX2J5KGRpYS5zZW1hbmEpICU+JSBzdW1tYXJpemUoa21waF9hdmcgPSBtZWFuKHZlbC5tZWRpYS5rbXBoKSkgLT4gdm0KYmFycGxvdCh2bSRrbXBoX2F2ZywgbmFtZXMuYXJnPWR3a1t2bSRkaWEuc2VtYW5hXSwgY29sPSJwdXJwbGUiKQpybSh2bSkKYGBgCgpWaWFnZW5zIHBvciBob3LDoXJpbwpgYGB7cn0KaGlzdChkYjIkaG9yYXJpbywgZnJlcT1GQUxTRSwgY29sPSJsaWdodCB5ZWxsb3ciKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBob3LDoXJpbwpgYGB7cn0KZGIyICU+JSBncm91cF9ieShob3JhcmlvPWZsb29yKGhvcmFyaW8pKSAlPiUgc3VtbWFyaXplKGttcGhfYXZnID0gbWVhbih2ZWwubWVkaWEua21waCkpIC0+IHZtCmJhcnBsb3Qodm0ka21waF9hdmcsIG5hbWVzLmFyZz12bSRob3JhcmlvLCBjb2w9InB1cnBsZSIpCnJtKHZtKQpgYGAKCj09PT09PT0KLS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkobHVicmlkYXRlKQojZGlhcyBkYSBzZW1hbmEKZHdrID0gYygiZG9tIiwgInNlZyIsICJ0ZXIiLCAicXVhIiwgInF1aSIsICJzZXgiLCAic2FiIikKYGBgCgpOb3ZhcyBjb2x1bmFzIHBhcmEgYW7DoWxpc2U6CnZlbG9jaWRhZGUgbcOpZGlhLCBjb25zaWRlcmFuZG8gY2FtaW5obyByZXRvIChkaXN0w6JuY2lhIGV1Y2xpZGlhbmEpIC0gZW1ib3JhIG7Do28gcmVmbGl0YSBhIHJlbGlkYWRlIGRldmlkbyBhbyBmb3JtYXRvIGRhcyBydWFzLCDDqSBhcGxpY8OhdmVsIHBhcmEgYW5hbGlzYXIgbyBkZXNsb2NhbWVudG8gZGUgdW1hIG1hbmVpcmEgYXByb3hpbWFkYTsKZGlhIGRhIHNlbWFuYTsgbcOqczsgaG9yw6FyaW8gKHBpY2t1cCkKYGBge3J9CmRiICU+JSAgbXV0YXRlKHRyaXBfZHVyYXRpb25fbSA9IHRyaXBfZHVyYXRpb24gLyA2MCkgJT4lICN0cmlwX2R1cmF0aW9uIGVtIG1pbnV0b3MKICAgICAgICBtdXRhdGUodmVsLm1lZGlhLmttcGggPSAoRGlzdC5FdWMuS00gKiA2MCkgLyB0cmlwX2R1cmF0aW9uX20pICU+JSAjY29uc2lkLmNhbWluaG8gZGlyZXRvCiAgICAgICAgbXV0YXRlKGR0X3BpY2t1cCA9IHltZF9obXMocGlja3VwX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkdF9kcm9wb2ZmID0geW1kX2htcyhkcm9wb2ZmX2RhdGV0aW1lKSkgJT4lIAogICAgICAgIG11dGF0ZShkaWEuc2VtYW5hID0gd2RheShkdF9waWNrdXApKSAlPiUgIzE9ZG9tIH4gNz1zYWIKICAgICAgICBtdXRhdGUoYW5vLm1lcyA9IHN1YnN0cihwaWNrdXBfZGF0ZXRpbWUsIDEsIDcpKSAlPiUKICAgICAgICBtdXRhdGUoaG9yYXJpbyA9IGhvdXIoZHRfcGlja3VwKSApIC0+IGRiMgoKI3ZlbG9jaWRhZGUgbcOpZGlhCnN1bW1hcnkoZGIyJHZlbC5tZWRpYS5rbXBoKQpgYGAKRGV0ZWN0YWRvIG11aXRvcyBvdXRsaWVycyAoZXguOiBNYXggPiAxMDAwMCBrbS9oKQoKCgpSZWdyZXNzw6NvICoqVGVtcG8gZGUgdmlhZ2VtIHZzIEtNCgpgYGB7cn0KcGxvdCh4PWRiJERpc3QuRXVjLktNLCB5PWRiJHRyaXBfZHVyYXRpb24vNjAsIHBjaD0yMCwgY2V4PS4xKQptID0gbG0oZGIkdHJpcF9kdXJhdGlvbi82MCB+IGRiJERpc3QuRXVjLktNKQphYmxpbmUobSwgY29sPSJyZWQiKQpybShtKQpgYGAKClRlbXBvIGRlIHZpYWdlbSB2cyBLbSAtIFRlcsOnYS1mZWlyYQpgYGB7cn0KZjEgPSBmaWx0ZXIoZGIyLCBkaWEuc2VtYW5hID09IDMpCmYyID0gZmlsdGVyKGYxLCBob3JhcmlvID09IDUpCmYzID0gZmlsdGVyKGYyLCBjbHVzdGVyX3BpY2t1cCA9PSA0KQpmID0gZmlsdGVyKGYzLCBjbHVzdGVyX2Ryb3BvZmYgPT0gMykKCgpwbG90KHg9ZiREaXN0LkV1Yy5LTSwgeT1mJHRyaXBfZHVyYXRpb25fbSwgcGNoPTIwLCBjZXg9LjEpCm0gPSBsbShmJHRyaXBfZHVyYXRpb25fbSB+IGYkRGlzdC5FdWMuS00pCmFibGluZShtLCBjb2w9InJlZCIpCnJtKG0sIGYpCmBgYAoKYGBge3J9CiNoaXN0KGRiMiRkaWEuc2VtYW5hLCBicmVha3M9MDo3LCBmcmVxPUZBTFNFLCBsYWJlbHM9ZHdrLCBtYWluPSJEaWEgZGEgc2VtYW5hIikKZGIyICU+JSBncm91cF9ieShkaWEuc2VtYW5hKSAlPiUgc3VtbWFyaXplKHF0ZCA9IG4oKSkgLT4gcXRkCmJhcnBsb3QocXRkJHF0ZCwgbmFtZXMuYXJnPWR3a1txdGQkZGlhLnNlbWFuYV0sIGNvbD0ib3JhbmdlIikKcm0ocXRkKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBkaWEgZGEgc2VtYW5hCmBgYHtyfQpkYjIgJT4lIGdyb3VwX2J5KGRpYS5zZW1hbmEpICU+JSBzdW1tYXJpemUoa21waF9hdmcgPSBtZWFuKHZlbC5tZWRpYS5rbXBoKSkgLT4gdm0KYmFycGxvdCh2bSRrbXBoX2F2ZywgbmFtZXMuYXJnPWR3a1t2bSRkaWEuc2VtYW5hXSwgY29sPSJwdXJwbGUiKQpybSh2bSkKYGBgCgpWaWFnZW5zIHBvciBob3LDoXJpbwpgYGB7cn0KaGlzdChkYjIkaG9yYXJpbywgZnJlcT1GQUxTRSwgY29sPSJsaWdodCB5ZWxsb3ciKQpgYGAKClZlbG9jaWRhZGUgbcOpZGlhIHBvciBob3LDoXJpbwpgYGB7cn0KZGIyICU+JSBncm91cF9ieShob3JhcmlvPWZsb29yKGhvcmFyaW8pKSAlPiUgc3VtbWFyaXplKGttcGhfYXZnID0gbWVhbih2ZWwubWVkaWEua21waCkpIC0+IHZtCmJhcnBsb3Qodm0ka21waF9hdmcsIG5hbWVzLmFyZz12bSRob3JhcmlvLCBjb2w9InB1cnBsZSIpCnJtKHZtKQpgYGAKCj4+Pj4+Pj4gMjg2MGRjOTI1NDNlN2ZjM2UxYmRhOTAxYmMyZTAxNmRiZGIyYzEwMAo=</div>
 
 
 
