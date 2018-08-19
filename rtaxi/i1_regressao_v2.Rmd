@@ -77,3 +77,84 @@ barplot(vm$kmph_avg, names.arg=vm$horario, col="purple")
 rm(vm)
 ```
 
+=======
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(lubridate)
+#dias da semana
+dwk = c("dom", "seg", "ter", "qua", "qui", "sex", "sab")
+```
+
+Novas colunas para análise:
+velocidade média, considerando caminho reto (distância euclidiana) - embora não reflita a relidade devido ao formato das ruas, é aplicável para analisar o deslocamento de uma maneira aproximada;
+dia da semana; mês; horário (pickup)
+```{r}
+db %>%  mutate(trip_duration_m = trip_duration / 60) %>% #trip_duration em minutos
+        mutate(vel.media.kmph = (Dist.Euc.KM * 60) / trip_duration_m) %>% #consid.caminho direto
+        mutate(dt_pickup = ymd_hms(pickup_datetime)) %>% 
+        mutate(dt_dropoff = ymd_hms(dropoff_datetime)) %>% 
+        mutate(dia.semana = wday(dt_pickup)) %>% #1=dom ~ 7=sab
+        mutate(ano.mes = substr(pickup_datetime, 1, 7)) %>%
+        mutate(horario = hour(dt_pickup) ) -> db2
+
+#velocidade média
+summary(db2$vel.media.kmph)
+```
+Detectado muitos outliers (ex.: Max > 10000 km/h)
+
+
+
+Regressão **Tempo de viagem vs KM
+
+```{r}
+plot(x=db$Dist.Euc.KM, y=db$trip_duration/60, pch=20, cex=.1)
+m = lm(db$trip_duration/60 ~ db$Dist.Euc.KM)
+abline(m, col="red")
+rm(m)
+```
+
+Tempo de viagem vs Km - Terça-feira
+```{r}
+f1 = filter(db2, dia.semana == 3)
+f2 = filter(f1, horario == 5)
+f3 = filter(f2, cluster_pickup == 4)
+f = filter(f3, cluster_dropoff == 3)
+
+
+plot(x=f$Dist.Euc.KM, y=f$trip_duration_m, pch=20, cex=.1)
+m = lm(f$trip_duration_m ~ f$Dist.Euc.KM)
+abline(m, col="red")
+rm(m, f)
+```
+
+```{r}
+#hist(db2$dia.semana, breaks=0:7, freq=FALSE, labels=dwk, main="Dia da semana")
+db2 %>% group_by(dia.semana) %>% summarize(qtd = n()) -> qtd
+barplot(qtd$qtd, names.arg=dwk[qtd$dia.semana], col="orange")
+rm(qtd)
+```
+
+Velocidade média por dia da semana
+```{r}
+db2 %>% group_by(dia.semana) %>% summarize(kmph_avg = mean(vel.media.kmph)) -> vm
+barplot(vm$kmph_avg, names.arg=dwk[vm$dia.semana], col="purple")
+rm(vm)
+```
+
+Viagens por horário
+```{r}
+hist(db2$horario, freq=FALSE, col="light yellow")
+```
+
+Velocidade média por horário
+```{r}
+db2 %>% group_by(horario=floor(horario)) %>% summarize(kmph_avg = mean(vel.media.kmph)) -> vm
+barplot(vm$kmph_avg, names.arg=vm$horario, col="purple")
+rm(vm)
+```
+
+>>>>>>> 2860dc92543e7fc3e1bda901bc2e016dbdb2c100
