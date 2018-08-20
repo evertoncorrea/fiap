@@ -16,12 +16,11 @@ shinyUI(
         
         navlistPanel(
             "Portfolio",
-            tabPanel("Painel 1",
-                   includeHTML("nbtest.nb.html")
+            tabPanel("Basics",
+                   includeHTML("basics.nb.html")
             ),
-            tabPanel("Painel 2",
-                   h3("Página 2"),
-                   includeMarkdown("nbtest.Rmd")
+            tabPanel("Datasets",
+                   includeHTML("datasets.nb.html")
             )
         )
     )

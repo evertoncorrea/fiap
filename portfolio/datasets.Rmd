@@ -1,0 +1,44 @@
+---
+title: "Datasets"
+output: html_notebook
+---
+
+## Datasets
+
+Utilizando dataset construído internamente no R (mtcars)
+```{r}
+mtcars
+```
+
+Resumo das variáveis do dataset
+```{r}
+library(dplyr)
+summary(mtcars)
+```
+
+Visualizando o dataset
+```{r}
+head(mtcars) # primeiras linhas
+tail(mtcars, 3) # últimas linhas, limitando a quantidade informada
+```
+
+
+Trabalhar com colunas
+```{r}
+mtcars$mpg
+```
+
+### Selecionar linhas e colunas
+No dataset, podemos acessar os dados utilizando *[]* e informando quais linhas e quais colunas, por nome ou índice
+```{r}
+mtcars[2, c(5, 8)] # segunda linha, quinta e oitava colunas
+mtcars[5:7, c("cyl", "qsec")] # linhas 5 a 7, colunas nomeadas
+mtcars[, "mpg"]
+```
+
+
+Para listar os datasets internos do R disponíveis para estudo e testes
+```{r}
+data()
+```
+

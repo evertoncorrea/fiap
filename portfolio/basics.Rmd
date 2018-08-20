@@ -1,0 +1,59 @@
+---
+title: "Basics"
+output: html_notebook
+---
+
+## Comandos básicos do R
+
+### Atribuição de variáveis
+Atribuição pode ser feita com operadores *=* ou *<-* e *->*
+```{r}
+a <- 1 #inteiro
+b = 2. #decimal
+"hello!" -> c #caracteres
+d = FALSE #booleano
+e = 4.3 + 6i #complexo
+a
+b
+c
+d
+e
+```
+
+###Sequências
+```{r}
+1:5
+```
+
+###Criação de vetores e matrizes
+Utilizar o c()
+```{r}
+c(3.2, 4.4, 0, 55)
+```
+Para a criação de arrays, fornecer o parâmetro dim com o tamanho de cada dimensão
+```{r}
+array(1:6, dim=c(2,3))
+```
+As dimensões a partir da 3a são representadas em páginas
+```{r}
+array(1:24, dim=c(2,3,4)) # 2 linhas, 3 colunas, 4 páginas
+```
+
+Utilizando função matrix
+```{r}
+m = matrix(1:6, ncol = 3)
+m
+```
+
+Obtendo elementos
+```{r}
+m[1, 3]
+```
+
+Criando subset simples
+```{r}
+arr = 1:20
+arr
+arr[5 : 8]
+```
+
