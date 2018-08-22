@@ -1,0 +1,49 @@
+---
+title: "Datasets 2"
+output: html_notebook
+---
+
+# Manipulação de datasets
+
+### Criação de colunas processadas
+
+A dataset processado fica em outra variável
+starwars é um dataset incluso no R
+```{r}
+head(starwars)
+```
+
+Criando coluna imc com função mutate, que retorna um dataset semelhante mas com a coluna criada
+```{r}
+library(dplyr)
+s2 <- mutate(starwars, imc = mass / ((height / 100) ^ 2) )
+s2
+```
+
+Fazendo operações em cima do dataset utilizando pipe (usar Command-Shift-M para gerar caracteres %>%)
+Notar que nesta sintaxe do pipe o resultado é passado adiante e a função chamada tem como primeiro parâmetro o resultado da expressão anterior, sem ter que informar este parâmetro
+Muito útil quando temos que fazer várias manipulações de dados (criar coluna, agrupar, etc) em um só comando
+```{r}
+starwars %>% 
+  mutate(name, imc = mass / ((height / 100) ^ 2)) %>%
+  select(name:mass, imc)
+```
+
+Exemplo de ordenação pela coluna mass
+Obs.: NA considerado antes nas ordenações
+```{r}
+starwars %>% arrange(desc(mass)) %>% head()
+starwars %>% arrange(desc(mass)) %>% tail()
+```
+
+Exemplo de agrupamento por espécie, retornando a quantidade de indivíduos por espécie e média da massa dos indivíduos deste espécie. Considera apenas espécies com mais de um indivíduo (filter)
+```{r}
+starwars %>%
+  group_by(species) %>%
+  summarise(
+    j = n(),
+    mass = mean(mass, na.rm = TRUE)
+  ) %>%
+  filter(j > 1)
+```
+

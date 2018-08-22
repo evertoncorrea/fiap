@@ -1,0 +1,26 @@
+---
+title: "Plots"
+output: html_notebook
+---
+# Plots
+
+Plot dos pontos da base cars
+```{r}
+plot(cars)
+```
+
+Podemos também especificar as colunas
+```{r}
+plot( x= cars$speed, y = cars$dist)
+```
+
+Exemplo de boxplot. Neste caso fizemos sobre o campo Ozone, quebrando por mês
+```{r}
+boxplot(airquality$Ozone~airquality$Month)
+```
+
+O gráfico de histograma também é interessante para analisar os valores de uma coluna de um dataset
+```{r}
+hist(cars$speed)
+```
+
